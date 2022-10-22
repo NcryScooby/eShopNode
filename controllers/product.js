@@ -4,6 +4,9 @@ const Product = require("../models/Product");
 // importa o path
 const path = require("path");
 
+// importa o fs para deletar a imagem do servidor
+const fs = require("fs");
+
 // Cria um novo produto
 const createProduct = (req, res) => {
   const { name, price, description } = req.body;
@@ -100,16 +103,23 @@ const deleteProduct = (req, res) => {
   Product.findById(id)
     .then((productExists) => {
       if (productExists) {
-        // deleta o produto
-        Product.findByIdAndDelete(id)
-          .then(() => {
-            res.json({
-              success: "Product deleted successfully",
-            });
-          })
-          .catch((err) => {
-            res.json(err);
-          });
+        // deleta a imagem vinculada ao produto da pasta uploads do servidor
+        fs.unlink(`./uploads/${productExists.image}`, (err) => {
+          if (err) {
+            console.log(err);
+          } else {
+            // deleta o produto
+            Product.findByIdAndDelete(id)
+              .then(() => {
+                res.json({
+                  success: "Product deleted successfully",
+                });
+              })
+              .catch((err) => {
+                res.json(err);
+              });
+          }
+        });
       } else {
         // retorna erro caso o produto não exista
         res.json({ error: "Product not found" });

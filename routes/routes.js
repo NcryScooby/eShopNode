@@ -15,6 +15,19 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+// delete file from uploads folder
+router.delete("/delete", checkHeader, (req, res) => {
+  const { filename } = req.body;
+  fs.unlink(__dirname, `./uploads/${filename}`, (err) => {
+    if (err) {
+      console.log(err);
+      res.status(500).json({ message: "Error deleting file" });
+    } else {
+      res.status(200).json({ message: "File deleted" });
+    }
+  });
+});
+
 const welcome = require("../controllers/welcome");
 const {
   createProduct,
